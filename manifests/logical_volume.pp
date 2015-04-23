@@ -19,6 +19,7 @@ define lvm::logical_volume (
   $stripesize        = undef,
   $readahead         = undef,
   $range             = undef,
+  $type              = undef,
 ) {
 
   validate_bool($mountpath_require)
@@ -49,6 +50,7 @@ define lvm::logical_volume (
     readahead    => $readahead,
     extents      => $extents,
     range        => $range,
+    type         => $type,
   }
 
   if $createfs {
