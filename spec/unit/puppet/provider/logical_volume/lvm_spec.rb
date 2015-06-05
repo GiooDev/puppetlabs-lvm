@@ -20,7 +20,8 @@ describe provider_class do
         @resource.expects(:[]).with(:stripesize).returns(nil).at_least_once
         @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
         @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
-        @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+        @resource.expects(:[]).with(:alloc).returns(nil).at_least_once
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
         @provider.create
       end
@@ -37,6 +38,7 @@ describe provider_class do
         @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
         @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
         @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
         @provider.create
       end
@@ -53,6 +55,7 @@ describe provider_class do
         @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
         @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
         @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--extents', '100%FREE', 'myvg')
         @provider.create
       end
@@ -68,6 +71,7 @@ describe provider_class do
         @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
         @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
         @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', '--extents', '80%vg', 'myvg')
         @provider.create
       end
@@ -83,6 +87,7 @@ describe provider_class do
         @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
         @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
         @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
         @provider.create
       end
@@ -102,6 +107,7 @@ describe provider_class do
         @resource.expects(:[]).with(:region_size).returns(nil).at_least_once
         @resource.expects(:[]).with(:no_sync).returns(nil).at_least_once
         @resource.expects(:[]).with(:alloc).returns(nil).at_least_once
+        @resource.expects(:[]).with(:type).returns(nil).at_least_once
         @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', '--mirrors', '1', '--mirrorlog', 'core', 'myvg')
         @provider.create
       end
@@ -121,6 +127,7 @@ describe provider_class do
           @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
           @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
           @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+          @resource.expects(:[]).with(:type).returns(nil).at_least_once
           @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
           @provider.create
           @provider.expects(:lvs).with('--noheading', '--unit', 'g', '/dev/myvg/mylv').returns(' 1.00g').at_least_once
@@ -141,6 +148,7 @@ describe provider_class do
           @resource.expects(:[]).with(:readahead).returns(nil).at_least_once
           @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
           @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+          @resource.expects(:[]).with(:type).returns(nil).at_least_once
           @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
           @provider.create
           @provider.expects(:lvs).with('--noheading', '--unit', 'g', '/dev/myvg/mylv').returns(' 1.00g').at_least_once
@@ -162,6 +170,7 @@ describe provider_class do
           @resource.expects(:[]).with(:size_is_minsize).returns(:false).at_least_once
           @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
           @resource.expects(:[]).with(:alloc).returns(nil).at_least_once        
+          @resource.expects(:[]).with(:type).returns(nil).at_least_once
           @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
           @provider.create
           @provider.expects(:lvs).with('--noheading', '--unit', 'g', '/dev/myvg/mylv').returns(' 1.00g').at_least_once
@@ -183,6 +192,7 @@ describe provider_class do
           @resource.expects(:[]).with(:size_is_minsize).returns(:true).at_least_once
           @resource.expects(:[]).with(:mirror).returns(nil).at_least_once
           @resource.expects(:[]).with(:alloc).returns(nil).at_least_once       
+          @resource.expects(:[]).with(:type).returns(nil).at_least_once
           @provider.expects(:lvcreate).with('-n', 'mylv', '--size', '1g', 'myvg')
           @provider.create
           @provider.expects(:lvs).with('--noheading', '--unit', 'g', '/dev/myvg/mylv').returns(' 1.00g').at_least_once
