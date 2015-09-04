@@ -20,6 +20,7 @@ define lvm::logical_volume (
   $readahead         = undef,
   $range             = undef,
   $type              = undef,
+  $mirror            = undef,
 ) {
 
   validate_bool($mountpath_require)
@@ -55,6 +56,7 @@ define lvm::logical_volume (
     extents      => $extents,
     range        => $range,
     type         => $type,
+    mirror       => $mirror,
   }
 
   if $createfs {
