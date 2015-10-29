@@ -8,10 +8,38 @@ describe provider_class do
     @provider = provider_class.new(@resource)
   end
 
+  pvs_output = <<-EOS
+  PV         VG     Fmt  Attr PSize  PFree
+  /dev/sda2  centos lvm2 a--  19.51g    0
+  /dev/sda3  centos lvm2 a--  10.11g    0
+  EOS
+
+  before :each do
+    @provider.class.stubs(:pvs).returns(pvs_output)
+  end
+
+  describe 'self.instances' do
+    it 'returns an array of physical volumes' do
+      physical_volumes = @provider.class.instances.collect {|x| x.name }
+
+      expect(physical_volumes).to include('/dev/sda2','/dev/sda3')
+    end
+  end
+
   describe 'when creating' do
     it "should execute the 'pvcreate'" do
       @resource.expects(:[]).with(:name).returns('/dev/hdx')
-      @provider.expects(:pvcreate).with('/dev/hdx')
+      @resource.expects(:[]).with(:force)
+      @provider.expects(:pvcreate).with(nil, '/dev/hdx')
+      @provider.create
+    end
+  end
+
+  describe 'when creating with force' do
+    it "should execute the 'pvcreate' with force option" do
+      @resource.expects(:[]).with(:name).returns('/dev/hdx')
+      @resource.expects(:[]).with(:force).returns(:true)
+      @provider.expects(:pvcreate).with('--force', '/dev/hdx')
       @provider.create
     end
   end

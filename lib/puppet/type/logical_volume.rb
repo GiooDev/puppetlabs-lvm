@@ -35,6 +35,25 @@ Puppet::Type.newtype(:logical_volume) do
         raise ArgumentError , "#{value} is not a valid logical volume size"
       end
     end
+    def insync?(is)
+      lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1024**2, "T" => 1024**3, "P" => 1024**4, "E" => 1024**5 }
+      if is =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+        current_size_bytes = $1.to_f
+        current_size_unit  = $3.upcase
+        current_size = current_size_bytes * lvm_size_units[current_size_unit]
+      end
+
+      if should =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+        new_size_bytes = $1.to_f
+        new_size_unit  = $3.upcase
+        new_size = new_size_bytes * lvm_size_units[new_size_unit]
+      end
+      if [:true, true, "true"].include?(@resource[:size_is_minsize])
+        new_size <= current_size
+      else
+        new_size == current_size
+      end
+    end
   end
 
   newparam(:extents) do
@@ -42,6 +61,24 @@ Puppet::Type.newtype(:logical_volume) do
     validate do |value|
       unless value =~ /^\d+(%(?:vg|pvs|free|origin)?)?$/i
         raise ArgumentError , "#{value} is not a valid logical volume extent"
+      end
+    end
+  end
+
+  newparam(:persistent) do
+    desc "Set to true to make the block device persistent"
+    validate do |value|
+      unless [:true, true, "true", :false, false, "false"].include?(value)
+        raise ArgumentError , "persistent must be either be true or false"
+      end
+    end
+  end
+
+  newparam(:minor) do
+    desc "Set the minor number"
+    validate do |value|
+      if value.to_i > 255 or value.to_i < 0
+        raise ArgumentError , "#{value} is not a valid value for minor. It must be an integer between 0 and 255"
       end
     end
   end

@@ -15,6 +15,39 @@ Puppet::Type.type(:logical_volume).provide :lvm do
     optional_commands :xfs_growfs => 'xfs_growfs',
                       :resize4fs  => 'resize4fs'
 
+    def self.instances
+      get_logical_volumes.collect do |logical_volumes_line|
+        logical_volumes_properties = get_logical_volume_properties(logical_volumes_line)
+        new(logical_volumes_properties)
+      end
+    end
+
+    def self.get_logical_volumes
+      full_lvs_output = lvs.split("\n")
+
+      # Remove first line
+      logical_volumes = full_lvs_output.drop(1)
+
+      logical_volumes
+    end
+
+    def self.get_logical_volume_properties(logical_volumes_line)
+      logical_volumes_properties = {}
+
+      # lvs output formats thus:
+      # LV      VG       Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+
+      # Split on spaces
+      output_array = logical_volumes_line.gsub(/\s+/m, ' ').strip.split(" ")
+
+      # Assign properties based on headers
+      # Just doing name for now...
+      logical_volumes_properties[:ensure]     = :present
+      logical_volumes_properties[:name]       = output_array[0]
+
+      logical_volumes_properties
+    end
+
     def create
         args = ['-n', @resource[:name]]
         if @resource[:size]
@@ -65,6 +98,15 @@ Puppet::Type.type(:logical_volume).provide :lvm do
             args.push('--type', @resource[:type])
         end
 
+        if @resource[:persistent]
+            # if persistent param is true, set arg to "y", otherwise set to "n"
+            args.push('--persistent', [:true, true, "true"].include?(@resource[:persistent]) ? 'y' : 'n')
+        end
+
+        if @resource[:minor]
+            args.push('--minor', @resource[:minor])
+        end
+
         args << @resource[:volume_group]
         lvcreate(*args)
     end
@@ -96,20 +138,19 @@ Puppet::Type.type(:logical_volume).provide :lvm do
     end
 
     def size=(new_size)
-        lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1048576, "T" => 1073741824, "P" => 1099511627776, "E" => 1125899906842624 }
-        lvm_size_units_match = lvm_size_units.keys().join('|')
+        lvm_size_units = { "K" => 1, "M" => 1024, "G" => 1024**2, "T" => 1024**3, "P" => 1024**4, "E" => 1024**5 }
 
         resizeable = false
         current_size = size()
 
-        if current_size =~ /(\d+\.{0,1}\d{0,2})(#{lvm_size_units_match})/i
-            current_size_bytes = $1.to_i
-            current_size_unit  = $2.upcase
+        if current_size =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+            current_size_bytes = $1.to_f
+            current_size_unit  = $3.upcase
         end
 
-        if new_size =~ /(\d+)(#{lvm_size_units_match})/i
-            new_size_bytes = $1.to_i
-            new_size_unit  = $2.upcase
+        if new_size =~ /^([0-9]+(\.[0-9]+)?)([KMGTPE])/i
+            new_size_bytes = $1.to_f
+            new_size_unit  = $3.upcase
         end
 
         ## Get the extend size
@@ -165,7 +206,7 @@ Puppet::Type.type(:logical_volume).provide :lvm do
             # Minus one because it says "2" when there is only one spare. And so on.
             n = ($1.to_i)-1
             #puts " current mirrors: #{n}"
-            return n.to_s 
+            return n.to_s
         end
         return 0.to_s
     end
@@ -180,7 +221,7 @@ Puppet::Type.type(:logical_volume).provide :lvm do
             end
 
             # Region size cannot be changed on an existing mirror (not even when changing to zero mirrors).
-            
+
             if @resource[:alloc]
                 args.push( '--alloc', @resource[:alloc] )
             end
